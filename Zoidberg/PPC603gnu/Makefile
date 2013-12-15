@@ -31,8 +31,8 @@ else
 MODE_DIR := NonDebug
 endif
 OBJ_DIR := .
-WS_ROOT_DIR := C:/zoidberg/zoidberg2013
-PRJ_ROOT_DIR := $(WS_ROOT_DIR)/Zoidberg
+WS_ROOT_DIR := C:/zoidberg
+PRJ_ROOT_DIR := $(WS_ROOT_DIR)/zoidberg2013/Zoidberg
 
 
 
