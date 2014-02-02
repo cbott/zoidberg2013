@@ -19,8 +19,10 @@ class ReboundRumbleRobot : public IterativeRobot
 	static const int PUT_DOWN_BUTTON = 5;
 	
 	static const float MAX_ACCEL_TIME = 0.5f;	//how many seconds we want it to take to get to max speed
+	static const float MAX_SPEED = 1.0f;
 	float max_delta_speed;
 	//max_delta_speed = 1 / (time-to-get-to-maximum-speed * cycles-in-one-second)
+	// = period / time-to-get-to-maximum-speed
 	DriverStationLCD * lcd;
 	Victor * left_drive;
 	Victor * right_drive;
@@ -77,7 +79,7 @@ public:
 	}
 
 	void TeleopInit(void) {
-
+		old_left_value = old_right_value = 0;
 	}
 
 	/********************************** Periodic Routines *************************************/
@@ -96,18 +98,21 @@ public:
 		//drive
 		lcd->PrintfLine(DriverStationLCD::kUser_Line1, "teleop");
 		
-		max_delta_speed = this->GetPeriod() / MAX_ACCEL_TIME;
+		max_delta_speed = MAX_SPEED / (MAX_ACCEL_TIME * GetLoopsPerSec());
+		//max_delta_speed = (20.0/1000) / MAX_ACCEL_TIME;
 		
-		float left_value = -zero(pilot->GetLeftY(), 0.05f);
+		float left_value = -zero(pilot->GetLeftY(), 0.05f);	//this axis is reversed on the gamepad
 		float right_value = zero(pilot->GetRightX(), 0.05f);
-		
+		lcd->PrintfLine(DriverStationLCD::kUser_Line3, "%f %f", left_value, right_value);
 		float delta_left = left_value - old_left_value;
 		float delta_right = right_value - old_right_value;
+		lcd->PrintfLine(DriverStationLCD::kUser_Line4, "%f %f %f", delta_left, delta_right, max_delta_speed);
+		//check if delta has a greater magnitude than the max, in either the positive or negative direction
 		if (delta_left > max_delta_speed && delta_left > 0.0f){
 			left_value = old_left_value + max_delta_speed;
 		} else if (delta_left < -max_delta_speed && delta_left < 0.0f){
 			left_value = old_left_value - max_delta_speed;
-		} 
+		}
 		//if neither of these is the case, |delta_left| is less than the max 
 		//and we can just use the left_value without modification.
 		
